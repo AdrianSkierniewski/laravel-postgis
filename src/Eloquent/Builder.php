@@ -1,6 +1,8 @@
 <?php namespace Phaza\LaravelPostgis\Eloquent;
 
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Phaza\LaravelPostgis\Exceptions\PostgisFieldTypesNotDefinedException;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\GeometryInterface;
 
 class Builder extends EloquentBuilder
@@ -9,7 +11,7 @@ class Builder extends EloquentBuilder
     {
         foreach ($values as $key => &$value) {
             if ($value instanceof GeometryInterface) {
-                $value = $this->asWKT($value);
+                $value = $this->asWKT($value, $key);
             }
         }
 
@@ -22,8 +24,15 @@ class Builder extends EloquentBuilder
     }
 
 
-    protected function asWKT(GeometryInterface $geometry)
+    protected function asWKT(GeometryInterface $geometry, $key)
     {
-        return $this->getQuery()->raw(sprintf("ST_GeogFromText('%s')", $geometry->toWKT()));
+        $type = $this->getModel()->getPostgisFieldType($key);
+        if ($type === Geometry::GEOGRAPHY) {
+            return $this->getQuery()->raw(sprintf("ST_GeogFromText('%s')", $geometry->toWKT()));
+        }
+        if ($type === Geometry::GEOMETRY) {
+            return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s')", $geometry->toWKT()));
+        }
+        throw new PostgisFieldTypesNotDefinedException();
     }
 }

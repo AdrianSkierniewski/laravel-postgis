@@ -5,6 +5,9 @@ use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 
 abstract class Geometry implements GeometryInterface, \JsonSerializable
 {
+    const GEOMETRY = 'GEOMETRY';
+    const GEOGRAPHY = 'GEOGRAPHY';
+
     protected static $wkb_types = [
         1 => Point::class,
         2 => LineString::class,

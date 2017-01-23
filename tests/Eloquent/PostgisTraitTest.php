@@ -3,6 +3,7 @@
 use Illuminate\Database\Eloquent\Model;
 use Mockery as m;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\PostgisConnection;
 
@@ -32,18 +33,22 @@ class PostgisTraitTest extends BaseTestCase
     public function testInsertPointHasCorrectSql()
     {
         $this->model->point = new Point(1, 2);
+        $this->model->point_geometry = new Point(1, 2);
         $this->model->save();
 
         $this->assertContains("ST_GeogFromText('POINT(2 1)')", $this->queries[0]);
+        $this->assertContains("ST_GeomFromText('POINT(2 1)')", $this->queries[0]);
     }
 
     public function testUpdatePointHasCorrectSql()
     {
         $this->model->exists = true;
         $this->model->point = new Point(2, 4);
+        $this->model->point_geometry = new Point(2, 4);
         $this->model->save();
 
         $this->assertContains("ST_GeogFromText('POINT(4 2)')", $this->queries[0]);
+        $this->assertContains("ST_GeomFromText('POINT(4 2)')", $this->queries[0]);
     }
 }
 
@@ -51,8 +56,14 @@ class TestModel extends Model
 {
     use PostgisTrait;
 
+    protected $postgisFieldTypes = [
+        'point'          => Geometry::GEOGRAPHY,
+        'point_geometry' => Geometry::GEOMETRY
+    ];
+
     protected $postgisFields = [
-        'point' => Point::class
+        'point'          => Point::class,
+        'point_geometry' => Point::class
     ];
 
 
