@@ -1,71 +1,91 @@
 <?php namespace Phaza\LaravelPostgis\Schema;
 
+use Phaza\LaravelPostgis\Geometries\Geometry;
+
 class Blueprint extends \Bosnadev\Database\Schema\Blueprint
 {
     /**
      * Add a point column on the table
      *
-     * @param      $column
+     * @param string $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function point($column)
+    public function point($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('point', $column);
+        return $this->addColumn('point', $column, compact('geomType', 'srid'));
     }
 
     /**
      * Add a multipoint column on the table
      *
-     * @param      $column
+     * @param        $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function multipoint($column)
+    public function multipoint($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('multipoint', $column);
+        return $this->addColumn('multipoint', $column, compact('geomType', 'srid'));
     }
 
     /**
      * Add a polygon column on the table
      *
-     * @param      $column
+     * @param        $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function polygon($column)
+    public function polygon($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('polygon', $column);
+        return $this->addColumn('polygon', $column, compact('geomType', 'srid'));
     }
 
     /**
      * Add a multipolygon column on the table
      *
-     * @param      $column
+     * @param        $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function multipolygon($column)
+    public function multipolygon($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('multipolygon', $column);
+        return $this->addColumn('multipolygon', $column, compact('geomType', 'srid'));
     }
 
     /**
      * Add a linestring column on the table
      *
-     * @param      $column
+     * @param        $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function linestring($column)
+    public function linestring($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('linestring', $column);
+        return $this->addColumn('linestring', $column, compact('geomType', 'srid'));
     }
 
     /**
      * Add a multilinestring column on the table
      *
-     * @param      $column
+     * @param        $column
+     * @param string $geomType
+     * @param int    $srid
+     *
      * @return \Illuminate\Support\Fluent
      */
-    public function multilinestring($column)
+    public function multilinestring($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
     {
-        return $this->addColumn('multilinestring', $column);
+        return $this->addColumn('multilinestring', $column, compact('geomType', 'srid'));
     }
 
     /**
@@ -77,6 +97,18 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
     public function geography($column)
     {
         return $this->addColumn('geography', $column);
+    }
+
+    /**
+     * Add a geometry column on the table
+     *
+     * @param   string $column
+     *
+     * @return \Illuminate\Support\Fluent
+     */
+    public function geometry($column)
+    {
+        return $this->addColumn('geometry', $column);
     }
 
     /**

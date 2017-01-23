@@ -10,11 +10,12 @@ class PostgisGrammar extends PostgresGrammar
      * Adds a statement to add a point geometry column
      *
      * @param \Illuminate\Support\Fluent $column
+     *
      * @return string
      */
     public function typePoint(Fluent $column)
     {
-        return 'GEOGRAPHY(POINT, 4326)';
+        return $column->geomType . '(POINT, ' . $column->srid . ')';
     }
 
     /**
@@ -25,7 +26,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeMultipoint(Fluent $column)
     {
-        return 'GEOGRAPHY(MULTIPOINT, 4326)';
+        return $column->geomType . '(MULTIPOINT, ' . $column->srid . ')';
     }
 
     /**
@@ -36,7 +37,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typePolygon(Fluent $column)
     {
-        return 'GEOGRAPHY(POLYGON, 4326)';
+        return $column->geomType . '(POLYGON, ' . $column->srid . ')';
     }
 
     /**
@@ -47,7 +48,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeMultipolygon(Fluent $column)
     {
-        return 'GEOGRAPHY(MULTIPOLYGON, 4326)';
+        return $column->geomType . '(MULTIPOLYGON, ' . $column->srid . ')';
     }
 
     /**
@@ -58,7 +59,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeLinestring(Fluent $column)
     {
-        return 'GEOGRAPHY(LINESTRING, 4326)';
+        return $column->geomType . '(LINESTRING, ' . $column->srid . ')';
     }
 
     /**
@@ -69,7 +70,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeMultilinestring(Fluent $column)
     {
-        return 'GEOGRAPHY(MULTILINESTRING, 4326)';
+        return $column->geomType . '(MULTILINESTRING, ' . $column->srid . ')';
     }
 
     /**
@@ -81,6 +82,17 @@ class PostgisGrammar extends PostgresGrammar
     public function typeGeography(Fluent $column)
     {
         return 'GEOGRAPHY';
+    }
+
+    /**
+     * Adds a statement to add a linestring geometry column
+     *
+     * @param \Illuminate\Support\Fluent $column
+     * @return string
+     */
+    public function typeGeometry(Fluent $column)
+    {
+        return 'GEOMETRY';
     }
 
     /**
