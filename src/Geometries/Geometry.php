@@ -1,67 +1,55 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
-use GeoIO\WKB\Parser\Parser;
-use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
+use GeoIO\WKB\Parser\Parser as WKBParser;
+use GeoIO\WKT\Parser\Parser as WKTParser;
 
 abstract class Geometry implements GeometryInterface, \JsonSerializable
 {
     const GEOMETRY = 'GEOMETRY';
     const GEOGRAPHY = 'GEOGRAPHY';
 
-    protected static $wkb_types = [
-        1 => Point::class,
-        2 => LineString::class,
-        3 => Polygon::class,
-        4 => MultiPoint::class,
-        5 => MultiLineString::class,
-        6 => MultiPolygon::class,
-        7 => GeometryCollection::class
-    ];
+    /**
+     * @var int|null
+     */
+    protected $srid;
 
-    public static function getWKTArgument($value)
+    /**
+     * @return int
+     */
+    public function getSRID()
     {
-        $left = strpos($value, '(');
-        $right = strrpos($value, ')');
-
-        return substr($value, $left + 1, $right - $left - 1);
+        return $this->srid;
     }
 
-    public static function getWKTClass($value)
+    /**
+     * @param int $srid
+     */
+    public function setSRID($srid)
     {
-        $left = strpos($value, '(');
-        $type = trim(substr($value, 0, $left));
-
-        switch (strtoupper($type)) {
-            case 'POINT':
-                return Point::class;
-            case 'LINESTRING':
-                return LineString::class;
-            case 'POLYGON':
-                return Polygon::class;
-            case 'MULTIPOINT':
-                return MultiPoint::class;
-            case 'MULTILINESTRING':
-                return MultiLineString::class;
-            case 'MULTIPOLYGON':
-                return MultiPolygon::class;
-            case 'GEOMETRYCOLLECTION':
-                return GeometryCollection::class;
-            default:
-                throw new UnknownWKTTypeException('Type was ' . $type);
-        }
+        $this->srid = $srid;
     }
 
+    /**
+     * @param $wkb
+     *
+     * @return $this
+     */
     public static function fromWKB($wkb)
     {
-        $parser = new Parser(new Factory());
+        $parser = new WKBParser(new Factory());
 
         return $parser->parse($wkb);
     }
 
+    /**
+     * @param $wkt
+     *
+     * @return $this
+     */
     public static function fromWKT($wkt)
     {
-        $wktArgument = static::getWKTArgument($wkt);
+        $parser = new WKTParser(new Factory());
 
-        return static::fromString($wktArgument);
+        return $parser->parse($wkt);
     }
 }

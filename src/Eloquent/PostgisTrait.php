@@ -5,7 +5,6 @@ use Illuminate\Support\Arr;
 use Phaza\LaravelPostgis\Exceptions\PostgisFieldsNotDefinedException;
 use Phaza\LaravelPostgis\Exceptions\PostgisFieldTypesNotDefinedException;
 use Phaza\LaravelPostgis\Geometries\Geometry;
-use Phaza\LaravelPostgis\Geometries\GeometryCollection;
 use Phaza\LaravelPostgis\Geometries\GeometryInterface;
 
 trait PostgisTrait
@@ -91,14 +90,13 @@ trait PostgisTrait
      */
     protected function buildPostgisValue(Geometry $value, $key)
     {
-        $this->geometries[$key] = $value; //Preserve the geometry objects prior to the insert
         if ($this->getPostgisFieldType($key) === Geometry::GEOGRAPHY) {
-            if ($value instanceof GeometryCollection) {
-                return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s', 4326)", $value->toWKT()));
-            }
             return $this->getConnection()->raw(sprintf("ST_GeogFromText('%s')", $value->toWKT()));
         }
         if ($this->getPostgisFieldType($key) === Geometry::GEOMETRY) {
+            if ($value->getSRID() !== null) {
+                return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s', %d)", $value->toWKT(), $value->getSRID()));
+            }
             return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s')", $value->toWKT()));
         }
         throw new PostgisFieldTypesNotDefinedException();

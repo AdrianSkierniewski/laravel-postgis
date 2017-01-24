@@ -8,47 +8,38 @@ class MultiLineString extends Geometry implements Countable
     /**
      * @var LineString[]
      */
-    protected $linestrings = [];
+    protected $lineStrings = [];
 
     /**
-     * @param LineString[] $linestrings
+     * @param LineString[] $lineStrings
+     * @param int          $srid
      */
-    public function __construct(array $linestrings)
+    public function __construct(array $lineStrings, $srid = null)
     {
-        if (count($linestrings) < 1) {
+        if (count($lineStrings) < 1) {
             throw new InvalidArgumentException('$linestrings must contain at least one entry');
         }
 
-        $validated = array_filter($linestrings, function ($value) {
+        $validated = array_filter($lineStrings, function ($value) {
             return $value instanceof LineString;
         });
 
-        if (count($linestrings) !== count($validated)) {
+        if (count($lineStrings) !== count($validated)) {
             throw new InvalidArgumentException('$linestrings must be an array of Points');
         }
 
-        $this->linestrings = $linestrings;
+        $this->srid = $srid;
+        $this->lineStrings = $lineStrings;
     }
 
     public function getLineStrings()
     {
-        return $this->linestrings;
+        return $this->lineStrings;
     }
 
     public function toWKT()
     {
         return sprintf('MULTILINESTRING(%s)', (string)$this);
-    }
-
-    public static function fromString($wktArgument)
-    {
-        $str = preg_split('/\)\s*,\s*\(/', substr(trim($wktArgument), 1, -1));
-        $linestrings = array_map(function ($data) {
-            return LineString::fromString($data);
-        }, $str);
-
-
-        return new static($linestrings);
     }
 
     public function __toString()
@@ -60,7 +51,7 @@ class MultiLineString extends Geometry implements Countable
 
     public function count()
     {
-        return count($this->linestrings);
+        return count($this->lineStrings);
     }
 
     /**
@@ -72,7 +63,7 @@ class MultiLineString extends Geometry implements Countable
     {
         $linestrings = [];
 
-        foreach ($this->linestrings as $linestring) {
+        foreach ($this->lineStrings as $linestring) {
             $linestrings[] = $linestring->jsonSerialize();
         }
 

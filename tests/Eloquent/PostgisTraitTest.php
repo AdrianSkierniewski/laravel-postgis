@@ -34,10 +34,12 @@ class PostgisTraitTest extends BaseTestCase
     {
         $this->model->point = new Point(1, 2);
         $this->model->point_geometry = new Point(1, 2);
+        $this->model->point_geometry_srid = new Point(2, 2, 2180);
         $this->model->save();
 
         $this->assertContains("ST_GeogFromText('POINT(2 1)')", $this->queries[0]);
         $this->assertContains("ST_GeomFromText('POINT(2 1)')", $this->queries[0]);
+        $this->assertContains("ST_GeomFromText('POINT(2 2)', 2180)", $this->queries[0]);
     }
 
     public function testUpdatePointHasCorrectSql()
@@ -57,15 +59,16 @@ class TestModel extends Model
     use PostgisTrait;
 
     protected $postgisFieldTypes = [
-        'point'          => Geometry::GEOGRAPHY,
-        'point_geometry' => Geometry::GEOMETRY
+        'point'               => Geometry::GEOGRAPHY,
+        'point_geometry'      => Geometry::GEOMETRY,
+        'point_geometry_srid' => Geometry::GEOMETRY,
     ];
 
     protected $postgisFields = [
-        'point'          => Point::class,
-        'point_geometry' => Point::class
+        'point'               => Point::class,
+        'point_geometry'      => Point::class,
+        'point_geometry_srid' => Point::class
     ];
-
 
     public static $pdo;
 

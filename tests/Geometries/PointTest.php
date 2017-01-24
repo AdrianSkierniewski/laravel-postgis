@@ -11,6 +11,17 @@ class PointTest extends BaseTestCase
         $this->assertInstanceOf(Point::class, $point);
         $this->assertEquals(2, $point->getLat());
         $this->assertEquals(1, $point->getLng());
+        $this->assertSame(null, $point->getSRID());
+    }
+
+    public function testFromWKTWithSRID()
+    {
+        $point = Point::fromWKT('SRID=4326;POINT(1 2)');
+
+        $this->assertInstanceOf(Point::class, $point);
+        $this->assertEquals(2, $point->getLat());
+        $this->assertEquals(1, $point->getLng());
+        $this->assertSame(4326, $point->getSRID());
     }
 
     public function testToWKT()
@@ -45,7 +56,7 @@ class PointTest extends BaseTestCase
 
     public function testToString()
     {
-        $point = Point::fromString('1.3 2');
+        $point = Point::fromPair('1.3 2');
 
         $this->assertSame(1.3, $point->getLng());
         $this->assertSame(2.0, $point->getLat());

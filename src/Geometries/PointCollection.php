@@ -7,8 +7,10 @@ use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 use IteratorAggregate;
 use JsonSerializable;
+use GeoIO\WKB\Parser\Parser as WKBParser;
+use GeoIO\WKT\Parser\Parser as WKTParser;
 
-abstract class PointCollection implements IteratorAggregate, Arrayable, ArrayAccess, Countable, JsonSerializable
+abstract class PointCollection extends Geometry implements IteratorAggregate, Arrayable, ArrayAccess, Countable, JsonSerializable
 {
     /**
      * @var Point[]
@@ -17,8 +19,9 @@ abstract class PointCollection implements IteratorAggregate, Arrayable, ArrayAcc
 
     /**
      * @param Point[] $points
+     * @param int     $srid
      */
-    public function __construct(array $points)
+    public function __construct(array $points, $srid = null)
     {
         if (count($points) < 2) {
             throw new InvalidArgumentException('$points must contain at least two entries');
@@ -31,6 +34,7 @@ abstract class PointCollection implements IteratorAggregate, Arrayable, ArrayAcc
         if (count($points) !== count($validated)) {
             throw new InvalidArgumentException('$points must be an array of Points');
         }
+        $this->srid = $srid;
         $this->points = $points;
     }
 

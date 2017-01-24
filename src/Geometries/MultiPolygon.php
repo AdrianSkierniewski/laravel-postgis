@@ -12,8 +12,9 @@ class MultiPolygon extends Geometry implements Countable
 
     /**
      * @param Polygon[] $polygons
+     * @param int       $srid
      */
-    public function __construct(array $polygons)
+    public function __construct(array $polygons, $srid = null)
     {
         $validated = array_filter($polygons, function ($value) {
             return $value instanceof Polygon;
@@ -23,6 +24,7 @@ class MultiPolygon extends Geometry implements Countable
             throw new InvalidArgumentException('$polygons must be an array of Points');
         }
         $this->polygons = $polygons;
+        $this->srid = $srid;
     }
 
     public function toWKT()
@@ -35,16 +37,6 @@ class MultiPolygon extends Geometry implements Countable
         return implode(',', array_map(function (Polygon $polygon) {
             return sprintf('(%s)', (string) $polygon);
         }, $this->polygons));
-    }
-
-    public static function fromString($wktArgument)
-    {
-        $parts    = preg_split('/(\)\s*\)\s*,\s*\(\s*\()/', $wktArgument, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $polygons = static::assembleParts($parts);
-
-        return new static(array_map(function ($polygonString) {
-            return Polygon::fromString($polygonString);
-        }, $polygons));
     }
 
     /**
@@ -70,40 +62,6 @@ class MultiPolygon extends Geometry implements Countable
     public function getPolygons()
     {
         return $this->polygons;
-    }
-
-    /**
-     * Make an array like this:
-     * "((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1",
-     * ")), ((",
-     * "-1 -1,-1 -2,-2 -2,-2 -1,-1 -1",
-     * ")), ((",
-     * "-1 -1,-1 -2,-2 -2,-2 -1,-1 -1))"
-     *
-     * Into:
-     * "((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1))",
-     * "((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1))",
-     * "((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1))"
-     *
-     * @param array $parts
-     * @return array
-     */
-    protected static function assembleParts(array $parts)
-    {
-        $polygons = [];
-        $count    = count($parts);
-
-        for ($i = 0; $i < $count; $i++) {
-            if ($i % 2 !== 0) {
-                list($end, $start) = explode(',', $parts[$i]);
-                $polygons[$i - 1] .= $end;
-                $polygons[++$i] = $start . $parts[$i];
-            } else {
-                $polygons[] = $parts[$i];
-            }
-        }
-
-        return $polygons;
     }
 
     /**

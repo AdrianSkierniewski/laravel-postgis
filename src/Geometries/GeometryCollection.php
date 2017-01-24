@@ -1,7 +1,6 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
 use Countable;
-use GeoJson\GeoJson;
 use InvalidArgumentException;
 
 class GeometryCollection extends Geometry implements Countable
@@ -13,9 +12,9 @@ class GeometryCollection extends Geometry implements Countable
 
     /**
      * @param GeometryInterface[] $geometries
-     * @throws InvalidArgumentException
+     * @param int                 $srid
      */
-    public function __construct(array $geometries)
+    public function __construct(array $geometries, $srid = null)
     {
         $validated = array_filter($geometries, function ($value) {
             return $value instanceof GeometryInterface;
@@ -25,6 +24,7 @@ class GeometryCollection extends Geometry implements Countable
             throw new InvalidArgumentException('$geometries must be an array of Geometry objects');
         }
 
+        $this->srid = $srid;
         $this->geometries = $geometries;
     }
 
@@ -47,23 +47,6 @@ class GeometryCollection extends Geometry implements Countable
                     return $geometry->toWKT();
                 },
                 $this->geometries
-            )
-        );
-    }
-
-    public static function fromString($wktArgument)
-    {
-        $geometry_strings = preg_split('/,\s*(?=[A-Za-z])/', $wktArgument);
-
-        return new static(
-            array_map(
-                function ($geometry_string) {
-                    $klass = Geometry::getWKTClass($geometry_string);
-
-                    return call_user_func($klass . '::fromWKT', $geometry_string);
-
-                },
-                $geometry_strings
             )
         );
     }

@@ -1,16 +1,15 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
-use GeoJson\GeoJson;
-
 class Point extends Geometry
 {
     protected $lat;
     protected $lng;
 
-    public function __construct($lat, $lng)
+    public function __construct($lat, $lng, $srid = null)
     {
-        $this->lat = (float)$lat;
-        $this->lng = (float)$lng;
+        $this->lat  = (float)$lat;
+        $this->lng  = (float)$lng;
+        $this->srid = $srid;
     }
 
     public function getLat()
@@ -48,11 +47,6 @@ class Point extends Geometry
     public function toWKT()
     {
         return sprintf('POINT(%s)', (string)$this);
-    }
-
-    public static function fromString($wktArgument)
-    {
-        return static::fromPair($wktArgument);
     }
 
     public function __toString()

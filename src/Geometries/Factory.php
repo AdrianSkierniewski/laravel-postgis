@@ -1,44 +1,45 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
 class Factory implements \GeoIO\Factory {
-    public function createPoint( $dimension, array $coordinates, $srid = null )
+
+    public function createPoint($dimension, array $coordinates, $srid = null)
     {
-        return new Point( $coordinates['y'], $coordinates['x'] );
+        return new Point($coordinates['y'], $coordinates['x'], $srid);
     }
 
-    public function createLineString( $dimension, array $points, $srid = null )
+    public function createLineString($dimension, array $points, $srid = null)
     {
-        return new LineString( $points );
+        return new LineString($points, $srid);
     }
 
-    public function createLinearRing( $dimension, array $points, $srid = null )
+    public function createLinearRing($dimension, array $points, $srid = null)
     {
-        return new LineString( $points );
+        return new LineString($points, $srid);
     }
 
-    public function createPolygon( $dimension, array $lineStrings, $srid = null )
+    public function createPolygon($dimension, array $lineStrings, $srid = null)
     {
-        return new Polygon( $lineStrings );
+        return new Polygon($lineStrings, $srid);
     }
 
-    public function createMultiPoint( $dimension, array $points, $srid = null )
+    public function createMultiPoint($dimension, array $points, $srid = null)
     {
-        return new MultiPoint( $points );
+        return new MultiPoint($points, $srid);
     }
 
-    public function createMultiLineString( $dimension, array $lineStrings, $srid = null )
+    public function createMultiLineString($dimension, array $lineStrings, $srid = null)
     {
-        return new MultiLineString( $lineStrings );
+        return new MultiLineString($lineStrings, $srid);
     }
 
-    public function createMultiPolygon( $dimension, array $polygons, $srid = null )
+    public function createMultiPolygon($dimension, array $polygons, $srid = null)
     {
-        return new MultiPolygon( $polygons );
+        return new MultiPolygon($polygons, $srid);
     }
 
-    public function createGeometryCollection( $dimension, array $geometries, $srid = null )
+    public function createGeometryCollection($dimension, array $geometries, $srid = null)
     {
-        return new GeometryCollection( $geometries );
+        return new GeometryCollection($geometries, $srid);
     }
 
 }

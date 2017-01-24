@@ -31,6 +31,9 @@ class Builder extends EloquentBuilder
             return $this->getQuery()->raw(sprintf("ST_GeogFromText('%s')", $geometry->toWKT()));
         }
         if ($type === Geometry::GEOMETRY) {
+            if ($geometry->getSRID() !== null) {
+                return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s', %d)", $geometry->toWKT(), $geometry->getSRID()));
+            }
             return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s')", $geometry->toWKT()));
         }
         throw new PostgisFieldTypesNotDefinedException();

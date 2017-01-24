@@ -11,67 +11,39 @@ use Phaza\LaravelPostgis\Geometries\Polygon;
 
 class GeometryTest extends BaseTestCase
 {
-    public function testGetWKTArgument()
-    {
-        $this->assertEquals(
-            '0 0',
-            Geometry::getWKTArgument('POINT(0 0)')
-        );
-        $this->assertEquals(
-            '0 0,1 1,1 2',
-            Geometry::getWKTArgument('LINESTRING(0 0,1 1,1 2)')
-        );
-        $this->assertEquals(
-            '(0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1)',
-            Geometry::getWKTArgument('POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))')
-        );
-        $this->assertEquals(
-            '(0 0),(1 2)',
-            Geometry::getWKTArgument('MULTIPOINT((0 0),(1 2))')
-        );
-        $this->assertEquals(
-            '(0 0,1 1,1 2),(2 3,3 2,5 4)',
-            Geometry::getWKTArgument('MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))')
-        );
-        $this->assertEquals(
-            '((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1))',
-            Geometry::getWKTArgument('MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))')
-        );
-        $this->assertEquals(
-            'POINT(2 3),LINESTRING(2 3,3 4)',
-            Geometry::getWKTArgument('GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))')
-        );
-    }
-
-    public function testGetWKTClass()
+    public function testFromWKT()
     {
         $this->assertEquals(
             Point::class,
-            Geometry::getWKTClass('POINT(0 0)')
+            get_class(Geometry::fromWKT('POINT(0 0)'))
         );
         $this->assertEquals(
             LineString::class,
-            Geometry::getWKTClass('LINESTRING(0 0,1 1,1 2)')
+            get_class(Geometry::fromWKT('LINESTRING(0 0,1 1,1 2)'))
         );
         $this->assertEquals(
             Polygon::class,
-            Geometry::getWKTClass('POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))')
+            get_class(Geometry::fromWKT('POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))'))
         );
         $this->assertEquals(
             MultiPoint::class,
-            Geometry::getWKTClass('MULTIPOINT((0 0),(1 2))')
+            get_class(Geometry::fromWKT('MULTIPOINT((0 0),(1 2))'))
         );
         $this->assertEquals(
             MultiLineString::class,
-            Geometry::getWKTClass('MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))')
+            get_class(Geometry::fromWKT('MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))'))
         );
         $this->assertEquals(
             MultiPolygon::class,
-            Geometry::getWKTClass('MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))')
+            get_class(
+                Geometry::fromWKT(
+                    'MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))'
+                )
+            )
         );
         $this->assertEquals(
             GeometryCollection::class,
-            Geometry::getWKTClass('GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))')
+            get_class(Geometry::fromWKT('GEOMETRYCOLLECTION(POINT(2 3),LINESTRING(2 3,3 4))'))
         );
     }
 

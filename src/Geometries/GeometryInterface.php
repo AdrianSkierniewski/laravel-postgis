@@ -2,11 +2,15 @@
 
 interface GeometryInterface
 {
+    public function getSRID();
+
+    public function setSRID($srid);
+
     public function toWKT();
 
     public static function fromWKT($wkt);
 
-    public function __toString();
+    public static function fromWKB($wkb);
 
-    public static function fromString($wktArgument);
+    public function __toString();
 }

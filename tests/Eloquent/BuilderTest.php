@@ -7,6 +7,7 @@ use Illuminate\Database\Query\Expression;
 use Mockery as m;
 use Phaza\LaravelPostgis\Eloquent\Builder;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\Polygon;
@@ -37,9 +38,6 @@ class BuilderTest extends BaseTestCase
         $this->queryBuilder
           ->shouldReceive('get')
           ->andReturn([]);
-
-        $this->builder = new Builder($this->queryBuilder);
-        $this->builder->setModel(new TestBuilderModel());
     }
 
     public function testUpdate()
@@ -54,11 +52,11 @@ class BuilderTest extends BaseTestCase
           ->andReturn(1);
 
         $builder = m::mock(Builder::class, [$this->queryBuilder])->makePartial();
+        $builder->setModel(new TestBuilderModel());
         $builder->shouldAllowMockingProtectedMethods();
         $builder
           ->shouldReceive('addUpdatedAtColumn')
           ->andReturn(['point' => new Point(1, 2)]);
-
         $builder->update(['point' => new Point(1, 2)]);
     }
 
@@ -76,13 +74,14 @@ class BuilderTest extends BaseTestCase
         $linestring = new LineString([new Point(0, 0), new Point(1, 1), new Point(2, 2)]);
 
         $builder = m::mock(Builder::class, [$this->queryBuilder])->makePartial();
+        $builder->setModel(new TestBuilderModel());
         $builder->shouldAllowMockingProtectedMethods();
         $builder
           ->shouldReceive('addUpdatedAtColumn')
           ->andReturn(['linestring' => $linestring]);
 
         $builder
-          ->shouldReceive('asWKT')->with($linestring)->once();
+          ->shouldReceive('asWKT')->with($linestring, 'linestring')->once();
 
         $builder->update(['linestring' => $linestring]);
     }
@@ -92,9 +91,15 @@ class TestBuilderModel extends Model
 {
     use PostgisTrait;
 
+    protected $postgisFieldTypes = [
+        'point'      => Geometry::GEOGRAPHY,
+        'linestring' => Geometry::GEOGRAPHY,
+        'polygon'    => Geometry::GEOGRAPHY
+    ];
+
     protected $postgisFields = [
-      'point'      => Point::class,
-      'linestring' => LineString::class,
-      'polygon'    => Polygon::class
+        'point'      => Point::class,
+        'linestring' => LineString::class,
+        'polygon'    => Polygon::class
     ];
 }
