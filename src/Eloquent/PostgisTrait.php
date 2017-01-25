@@ -1,14 +1,20 @@
 <?php namespace Phaza\LaravelPostgis\Eloquent;
 
+use GeoIO\Geometry\Geometry;
+use GeoIO\WKB\Parser\Parser;
+use GeoIO\WKT\Generator\Generator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Arr;
 use Phaza\LaravelPostgis\Exceptions\PostgisFieldsNotDefinedException;
 use Phaza\LaravelPostgis\Exceptions\PostgisFieldTypesNotDefinedException;
-use Phaza\LaravelPostgis\Geometries\Geometry;
-use Phaza\LaravelPostgis\Geometries\GeometryInterface;
+use Phaza\LaravelPostgis\Geometries\Factory;
+use Phaza\LaravelPostgis\PostGISColumn;
+use Phaza\LaravelPostgis\Geometries\WTKHandlerTrait;
 
 trait PostgisTrait
 {
+    use WTKHandlerTrait;
+
     public $geometries = [];
     /**
      * Create a new Eloquent query builder for the model.
@@ -23,10 +29,11 @@ trait PostgisTrait
 
     protected function performInsert(EloquentBuilder $query, array $options = [])
     {
+        $generator = $this->getWtkGenerator();
         foreach ($this->attributes as $key => $value) {
-            if ($value instanceof GeometryInterface ) {
+            if ($value instanceof Geometry) {
                 $this->geometries[$key] = $value; //Preserve the geometry objects prior to the insert
-                $this->attributes[$key] = $this->buildPostgisValue($value, $key);
+                $this->attributes[$key] = $this->buildPostgisValue($generator, $value, $key);
             }
         }
 
@@ -42,10 +49,10 @@ trait PostgisTrait
     public function setRawAttributes(array $attributes, $sync = false)
     {
         $pgFields = $this->getPostgisFields();
-
+        $parser = $this->getWkbParser();
         foreach ($attributes as $attribute => &$value) {
             if (in_array($attribute, $pgFields) && is_string($value) && strlen($value) >= 15) {
-                $value = Geometry::fromWKB($value);
+                $value = $parser->parse($value);
             }
         }
 
@@ -55,13 +62,10 @@ trait PostgisTrait
     public function getPostgisFields()
     {
         if (property_exists($this, 'postgisFields')) {
-            return Arr::isAssoc($this->postgisFields) ? //Is the array associative?
-                array_keys($this->postgisFields) : //Returns just the keys to preserve compatibility with previous versions
-                $this->postgisFields; //Returns the non-associative array that doesn't define the geometry type.
+            return Arr::isAssoc($this->postgisFields) ? array_keys($this->postgisFields) : $this->postgisFields;
         } else {
             throw new PostgisFieldsNotDefinedException(__CLASS__ . ' has to define $postgisFields');
         }
-
     }
 
     /**
@@ -74,31 +78,38 @@ trait PostgisTrait
     public function getPostgisFieldType($field)
     {
         if (property_exists($this, 'postgisFieldTypes')) {
-            return (isset($this->postgisFieldTypes[$field])) ? $this->postgisFieldTypes[$field] : Geometry::GEOGRAPHY;
+            return (isset($this->postgisFieldTypes[$field])) ? $this->postgisFieldTypes[$field] : PostGISColumn::GEOGRAPHY;
         }
-        return Geometry::GEOGRAPHY;
+        return PostGISColumn::GEOGRAPHY;
     }
 
     /**
      * It builds PostGIS value, so Postgres can understand it
      *
-     * @param Geometry $value
-     * @param          $key
+     * @param Generator $generator
+     * @param Geometry  $geometry
+     * @param           $key
      *
      * @return
-     * @throws PostgisFieldTypesNotDefinedException
      */
-    protected function buildPostgisValue(Geometry $value, $key)
+    protected function buildPostgisValue(Generator $generator, Geometry $geometry, $key)
     {
-        if ($this->getPostgisFieldType($key) === Geometry::GEOGRAPHY) {
-            return $this->getConnection()->raw(sprintf("ST_GeogFromText('%s')", $value->toWKT()));
+        $wkt = $generator->generate($geometry);
+        if ($this->getPostgisFieldType($key) === PostGISColumn::GEOGRAPHY) {
+            return $this->getConnection()->raw(sprintf("ST_GeogFromText('%s')", $wkt));
         }
-        if ($this->getPostgisFieldType($key) === Geometry::GEOMETRY) {
-            if ($value->getSRID() !== null) {
-                return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s', %d)", $value->toWKT(), $value->getSRID()));
+        if ($this->getPostgisFieldType($key) === PostGISColumn::GEOMETRY) {
+
+            if ($geometry->getSrid() !== null) {
+                return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s', %d)", $wkt, $geometry->getSRID()));
             }
-            return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s')", $value->toWKT()));
+            return $this->getConnection()->raw(sprintf("ST_GeomFromText('%s')", $wkt));
         }
         throw new PostgisFieldTypesNotDefinedException();
+    }
+
+    protected function getWkbParser()
+    {
+        return new Parser(new Factory());
     }
 }

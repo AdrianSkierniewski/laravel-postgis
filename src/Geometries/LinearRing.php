@@ -3,7 +3,7 @@
 use Countable;
 use JsonSerializable;
 
-class MultiPoint extends \GeoIO\Geometry\MultiPoint implements Countable, JsonSerializable
+class LinearRing extends \GeoIO\Geometry\LinearRing implements Countable, JsonSerializable
 {
     /**
      * Count elements of an object
@@ -21,18 +21,18 @@ class MultiPoint extends \GeoIO\Geometry\MultiPoint implements Countable, JsonSe
     }
 
     /**
-     * Convert to GeoJson MultiPoint that is jsonable to GeoJSON
+     * Convert to GeoJson Point that is jsonable to GeoJSON
      *
-     * @return \GeoJson\Geometry\MultiPoint
+     * @return \GeoJson\Geometry\LinearRing
      */
     public function jsonSerialize()
     {
         $points = [];
+
         foreach ($this->getPoints() as $point) {
             $points[] = $point->jsonSerialize();
         }
 
-        return new \GeoJson\Geometry\MultiPoint($points);
+        return new \GeoJson\Geometry\LinearRing($points);
     }
-
 }

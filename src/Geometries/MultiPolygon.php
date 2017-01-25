@@ -1,44 +1,10 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
 use Countable;
-use InvalidArgumentException;
+use JsonSerializable;
 
-class MultiPolygon extends Geometry implements Countable
+class MultiPolygon extends \GeoIO\Geometry\MultiPolygon implements Countable, JsonSerializable
 {
-    /**
-     * @var Polygon[]
-     */
-    protected $polygons;
-
-    /**
-     * @param Polygon[] $polygons
-     * @param int       $srid
-     */
-    public function __construct(array $polygons, $srid = null)
-    {
-        $validated = array_filter($polygons, function ($value) {
-            return $value instanceof Polygon;
-        });
-
-        if (count($polygons) !== count($validated)) {
-            throw new InvalidArgumentException('$polygons must be an array of Points');
-        }
-        $this->polygons = $polygons;
-        $this->srid = $srid;
-    }
-
-    public function toWKT()
-    {
-        return sprintf('MULTIPOLYGON(%s)', (string) $this);
-    }
-
-    public function __toString()
-    {
-        return implode(',', array_map(function (Polygon $polygon) {
-            return sprintf('(%s)', (string) $polygon);
-        }, $this->polygons));
-    }
-
     /**
      * (PHP 5 &gt;= 5.1.0)<br/>
      * Count elements of an object
@@ -51,17 +17,7 @@ class MultiPolygon extends Geometry implements Countable
      */
     public function count()
     {
-        return count($this->polygons);
-    }
-
-    /**
-     * Get the polygons that make up this MultiPolygon
-     *
-     * @return array|Polygon[]
-     */
-    public function getPolygons()
-    {
-        return $this->polygons;
+        return count($this->getPolygons());
     }
 
     /**
@@ -72,7 +28,7 @@ class MultiPolygon extends Geometry implements Countable
     public function jsonSerialize()
     {
         $polygons = [];
-        foreach ($this->polygons as $polygon) {
+        foreach ($this->getPolygons() as $polygon) {
             $polygons[] = $polygon->jsonSerialize();
         }
 

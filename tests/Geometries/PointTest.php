@@ -1,74 +1,83 @@
 <?php
 
+use GeoIO\Dimension;
+use GeoIO\Geometry\Coordinates;
+use GeoIO\WKT\Parser\Parser;
 use Phaza\LaravelPostgis\Geometries\Point;
 
 class PointTest extends BaseTestCase
 {
+    use \Phaza\LaravelPostgis\Geometries\WTKHandlerTrait;
+
+    /**
+     * @var Parser
+     */
+    private $wtkParser;
+
+    /**
+     * @var \GeoIO\WKT\Generator\Generator
+     */
+    private $wtkGenerator;
+
+    protected function setUp()
+    {
+        $this->wtkGenerator = $this->getWtkGenerator();
+        $this->wtkParser    = $this->getWktParser();
+    }
+
     public function testFromWKT()
     {
-        $point = Point::fromWKT('POINT(1 2)');
+        $point = $this->wtkParser->parse('POINT(1 2)');
 
         $this->assertInstanceOf(Point::class, $point);
-        $this->assertEquals(2, $point->getLat());
-        $this->assertEquals(1, $point->getLng());
-        $this->assertSame(null, $point->getSRID());
+        $this->assertEquals(2, $point->getY());
+        $this->assertEquals(1, $point->getX());
+        $this->assertSame(null, $point->getSrid());
     }
 
     public function testFromWKTWithSRID()
     {
-        $point = Point::fromWKT('SRID=4326;POINT(1 2)');
+        $point = $this->wtkParser->parse('SRID=4326;POINT(1 2)');
 
         $this->assertInstanceOf(Point::class, $point);
-        $this->assertEquals(2, $point->getLat());
-        $this->assertEquals(1, $point->getLng());
-        $this->assertSame(4326, $point->getSRID());
+        $this->assertEquals(2, $point->getY());
+        $this->assertEquals(1, $point->getX());
+        $this->assertSame(4326, $point->getSrid());
     }
 
     public function testToWKT()
     {
-        $point = new Point(1, 2);
+        $point = new Point(Dimension::DIMENSION_2D, new Coordinates(2, 1));
 
-        $this->assertEquals('POINT(2 1)', $point->toWKT());
+        $this->assertEquals('POINT(2.000000 1.000000)', $this->wtkGenerator->generate($point));
     }
 
-    public function testGettersAndSetters()
+    public function testToWKTWithSRID()
     {
-        $point = new Point(1, 2);
-        $this->assertSame(1.0, $point->getLat());
-        $this->assertSame(2.0, $point->getLng());
+        $point = new Point(Dimension::DIMENSION_2D, new Coordinates(3.4, 1.2), 2180);
 
-        $point->setLat('3');
-        $point->setLng('4');
-
-        $this->assertSame(3.0, $point->getLat());
-        $this->assertSame(4.0, $point->getLng());
+        $this->assertEquals('POINT(3.400000 1.200000)', $this->wtkGenerator->generate($point));
     }
 
-    public function testPair()
+    public function testToWKT3D()
     {
-        $point = Point::fromPair('1.5 2');
+        $point = new Point(Dimension::DIMENSION_3DZ, new Coordinates(2, 1, 3));
 
-        $this->assertSame(1.5, $point->getLng());
-        $this->assertSame(2.0, $point->getLat());
-
-        $this->assertSame('1.5 2', $point->toPair());
+        $this->assertEquals('POINT(2.000000 1.000000 3.000000)', $this->wtkGenerator->generate($point));
     }
 
-    public function testToString()
+    public function testGetters()
     {
-        $point = Point::fromPair('1.3 2');
-
-        $this->assertSame(1.3, $point->getLng());
-        $this->assertSame(2.0, $point->getLat());
-
-        $this->assertEquals('1.3 2', (string)$point);
+        $point = new Point(Dimension::DIMENSION_2D, new Coordinates(2, 1));
+        $this->assertSame(1, $point->getY());
+        $this->assertSame(2, $point->getX());
     }
 
     public function testJsonSerialize()
     {
-        $point = new Point(1.2, 3.4);
+        $point = new Point(Dimension::DIMENSION_2D, new Coordinates(3.4, 1.2));
 
         $this->assertInstanceOf(\GeoJson\Geometry\Point::class, $point->jsonSerialize());
-        $this->assertSame('{"type":"Point","coordinates":[3.4,1.2]}', json_encode($point));
+        $this->assertSame('{"type":"Point","coordinates":[1.2,3.4]}', json_encode($point));
     }
 }

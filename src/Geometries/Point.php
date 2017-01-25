@@ -1,59 +1,9 @@
 <?php namespace Phaza\LaravelPostgis\Geometries;
 
-class Point extends Geometry
+use JsonSerializable;
+
+class Point extends \GeoIO\Geometry\Point implements JsonSerializable
 {
-    protected $lat;
-    protected $lng;
-
-    public function __construct($lat, $lng, $srid = null)
-    {
-        $this->lat  = (float)$lat;
-        $this->lng  = (float)$lng;
-        $this->srid = $srid;
-    }
-
-    public function getLat()
-    {
-        return $this->lat;
-    }
-
-    public function setLat($lat)
-    {
-        $this->lat = (float)$lat;
-    }
-
-    public function getLng()
-    {
-        return $this->lng;
-    }
-
-    public function setLng($lng)
-    {
-        $this->lng = (float)$lng;
-    }
-
-    public function toPair()
-    {
-        return $this->getLng() . ' ' . $this->getLat();
-    }
-
-    public static function fromPair($pair)
-    {
-        list($lng, $lat) = explode(' ', trim($pair));
-
-        return new static((float)$lat, (float)$lng);
-    }
-
-    public function toWKT()
-    {
-        return sprintf('POINT(%s)', (string)$this);
-    }
-
-    public function __toString()
-    {
-        return $this->getLng() . ' ' . $this->getLat();
-    }
-
     /**
      * Convert to GeoJson Point that is jsonable to GeoJSON
      *
@@ -61,6 +11,6 @@ class Point extends Geometry
      */
     public function jsonSerialize()
     {
-        return new \GeoJson\Geometry\Point([$this->getLng(), $this->getLat()]);
+        return new \GeoJson\Geometry\Point([$this->getY(), $this->getX()]);
     }
 }

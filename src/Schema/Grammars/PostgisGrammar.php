@@ -1,6 +1,7 @@
 <?php namespace Phaza\LaravelPostgis\Schema\Grammars;
 
 use Illuminate\Support\Fluent;
+use Phaza\LaravelPostgis\PostGISColumn;
 use Phaza\LaravelPostgis\Schema\Blueprint;
 use Bosnadev\Database\Schema\Grammars\PostgresGrammar;
 
@@ -81,7 +82,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeGeography(Fluent $column)
     {
-        return 'GEOGRAPHY';
+        return PostGISColumn::GEOGRAPHY;
     }
 
     /**
@@ -92,7 +93,7 @@ class PostgisGrammar extends PostgresGrammar
      */
     public function typeGeometry(Fluent $column)
     {
-        return 'GEOMETRY';
+        return PostGISColumn::GEOMETRY;
     }
 
     /**

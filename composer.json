@@ -10,8 +10,11 @@
     "require": {
         "php": ">=5.5",
         "bosnadev/database": "~0.16",
+        "geo-io/geojson": "^1.0",
         "geo-io/geometry": "^1.0",
+        "geo-io/wkb-generator": "^1.0",
         "geo-io/wkb-parser": "^1.0",
+        "geo-io/wkt-generator": "^1.0",
         "geo-io/wkt-parser": "^1.0",
         "illuminate/database": "^5.2",
         "jmikola/geojson": "^1.0"
@@ -42,6 +45,10 @@
         {
             "name": "Nicholas Barrett",
             "email": "njbarrett7@gmail.com"
+        },
+        {
+            "name": "Adrian Skierniewski",
+            "email": "adrian.skierniewski@gmail.com"
         }
     ]
 }

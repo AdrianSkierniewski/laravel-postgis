@@ -1,20 +1,24 @@
 <?php namespace Phaza\LaravelPostgis\Eloquent;
 
+use GeoIO\Geometry\Geometry;
+use GeoIO\WKT\Generator\Generator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Phaza\LaravelPostgis\Exceptions\PostgisFieldTypesNotDefinedException;
-use Phaza\LaravelPostgis\Geometries\Geometry;
-use Phaza\LaravelPostgis\Geometries\GeometryInterface;
+use Phaza\LaravelPostgis\PostGISColumn;
+use Phaza\LaravelPostgis\Geometries\WTKHandlerTrait;
 
 class Builder extends EloquentBuilder
 {
+    use WTKHandlerTrait;
+
     public function update(array $values)
     {
+        $generator = $this->getWtkGenerator();
         foreach ($values as $key => &$value) {
-            if ($value instanceof GeometryInterface) {
-                $value = $this->asWKT($value, $key);
+            if ($value instanceof Geometry) {
+                $value = $this->asWKT($generator, $value, $key);
             }
         }
-
         return parent::update($values);
     }
 
@@ -23,18 +27,19 @@ class Builder extends EloquentBuilder
         return $this->getModel()->getPostgisFields();
     }
 
-
-    protected function asWKT(GeometryInterface $geometry, $key)
+    protected function asWKT(Generator $generator, Geometry $geometry, $key)
     {
+        $wkt = $generator->generate($geometry);
         $type = $this->getModel()->getPostgisFieldType($key);
-        if ($type === Geometry::GEOGRAPHY) {
-            return $this->getQuery()->raw(sprintf("ST_GeogFromText('%s')", $geometry->toWKT()));
+
+        if ($type === PostGISColumn::GEOGRAPHY) {
+            return $this->getQuery()->raw(sprintf("ST_GeogFromText('%s')", $wkt));
         }
-        if ($type === Geometry::GEOMETRY) {
-            if ($geometry->getSRID() !== null) {
-                return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s', %d)", $geometry->toWKT(), $geometry->getSRID()));
+        if ($type === PostGISColumn::GEOMETRY) {
+            if ($geometry->getSrid() !== null) {
+                return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s', %d)", $wkt, $geometry->getSrid()));
             }
-            return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s')", $geometry->toWKT()));
+            return $this->getQuery()->raw(sprintf("ST_GeomFromText('%s')", $wkt));
         }
         throw new PostgisFieldTypesNotDefinedException();
     }

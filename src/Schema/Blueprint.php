@@ -1,6 +1,6 @@
 <?php namespace Phaza\LaravelPostgis\Schema;
 
-use Phaza\LaravelPostgis\Geometries\Geometry;
+use Phaza\LaravelPostgis\PostGISColumn;
 
 class Blueprint extends \Bosnadev\Database\Schema\Blueprint
 {
@@ -13,7 +13,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function point($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function point($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('point', $column, compact('geomType', 'srid'));
     }
@@ -27,7 +27,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function multipoint($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function multipoint($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('multipoint', $column, compact('geomType', 'srid'));
     }
@@ -41,7 +41,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function polygon($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function polygon($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('polygon', $column, compact('geomType', 'srid'));
     }
@@ -55,7 +55,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function multipolygon($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function multipolygon($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('multipolygon', $column, compact('geomType', 'srid'));
     }
@@ -69,7 +69,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function linestring($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function linestring($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('linestring', $column, compact('geomType', 'srid'));
     }
@@ -83,7 +83,7 @@ class Blueprint extends \Bosnadev\Database\Schema\Blueprint
      *
      * @return \Illuminate\Support\Fluent
      */
-    public function multilinestring($column, $geomType = Geometry::GEOGRAPHY, $srid = 4326)
+    public function multilinestring($column, $geomType = PostGISColumn::GEOGRAPHY, $srid = 4326)
     {
         return $this->addColumn('multilinestring', $column, compact('geomType', 'srid'));
     }
