@@ -49,10 +49,9 @@ trait PostgisTrait
     public function setRawAttributes(array $attributes, $sync = false)
     {
         $pgFields = $this->getPostgisFields();
-        $parser = $this->getWkbParser();
         foreach ($attributes as $attribute => &$value) {
             if (in_array($attribute, $pgFields) && is_string($value) && strlen($value) >= 15) {
-                $value = $parser->parse($value);
+                $value = $this->getWkbParser()->parse($value);
             }
         }
 
